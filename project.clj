@@ -10,5 +10,6 @@
                  [org.clojure/tools.cli "0.3.1"]]
   :profiles {:dev {:dependencies [[lein-marginalia "0.8.0"]]
                    :resource-paths ["test/resources"]}}
-  :deploy-repositories [["releases" :clojars]]
+  :deploy-repositories [["clojars" {:sign-releases false}
+                         "releases" :clojars]]
   :warn-on-reflection false)

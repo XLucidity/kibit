@@ -10,13 +10,13 @@
     (if (neg? idx)
       (Character/isUpperCase (first sym))
       (Character/isUpperCase (nth sym (inc idx))))))
-  
+
 
 (defrules rules
   ;; clojure.string
   [(apply str (interpose ?x ?y)) (clojure.string/join ?x ?y)]
   [(apply str (reverse ?x)) (clojure.string/reverse ?x)]
-  [(apply str ?x) (clojure.string/join ?x)] 
+  [(apply str ?x) (clojure.string/join ?x)]
 
   ;; mapcat
   [(apply concat (apply map ?x ?y)) (mapcat ?x ?y)]
@@ -49,7 +49,7 @@
 
   ;; Java stuff
   [(.toString ?x) (str ?x)]
-  
+
   (let [obj (logic/lvar)
         method (logic/lvar)
         args (logic/lvar)]
@@ -73,34 +73,6 @@
               args (if s? (rest static-method) args)
               static-method (if s? (first static-method) static-method)]
           (logic/== % `(~(symbol (str klass "/" static-method)) ~@args))))])
-  
-  ;; Threading
-  (let [form (logic/lvar)
-        arg (logic/lvar)]
-    [#(logic/all (logic/== % (list '-> arg form)))
-     (fn [sbst]
-       (logic/conde
-        [(logic/all
-          (logic/pred form #(or (symbol? %) (keyword? %)))
-          (logic/== sbst (list form arg)))]
-        [(logic/all
-          (logic/pred form seq?)
-          (logic/project [form]
-            (logic/== sbst (list* (first form) arg (rest form)))))]))])
-
-  (let [form (logic/lvar)
-        arg (logic/lvar)]
-    [#(logic/all (logic/== % (list '->> arg form)))
-     (fn [sbst]
-       (logic/conde
-        [(logic/all
-          (logic/pred form #(or (symbol? %) (keyword? %)))
-          (logic/== sbst (list form arg)))]
-        [(logic/all
-          (logic/pred form seq?)
-          (logic/project [form]
-            (logic/== sbst (concat form (list arg)))))]))])
-
 
   ;; Other
   [(not (some ?pred ?coll)) (not-any? ?pred ?coll)])
@@ -120,7 +92,7 @@
   (map (fn [x] (Integer/parseInteger x))
        [1 2 3])
 
-  
+
   (map (fn [m] (:key m)) [some maps])
   (map (fn [m] (:key m alt)) [a b c])
 
@@ -130,12 +102,4 @@
   (. Thread (sleep (read-string "2000")))
   (. Thread sleep (read-string "2000"))
 
-  (-> x f) ;; (f x)
-  (-> x (f a b)) ;; (f x a b)
-  (-> x (f)) ;; (f x)
-
-  (->> x f) ;; (f x)
-  (->> x (f a b)) ;; (f a b x)
-  (->> x (f)) ;; (f x)
-  
   )
