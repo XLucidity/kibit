@@ -36,9 +36,9 @@
                              (if (empty? file-args) source-paths file-args))]
     (mapcat (fn [file] (try (check-file file :reporter (name-to-reporter (:reporter options)
                                                                          cli-reporter))
-                            (catch Exception e
-                              (println "Check failed -- skipping rest of file")
-                              (println (.getMessage e)))))
+                            (catch Throwable e
+                              (println (str "At " (.getPath file) ":0:\nCheck failed -- skipping rest of file"))
+                              (println (str "Exception message: " (pr-str (.getMessage e)))))))
             source-files)))
 
 (defn external-run
