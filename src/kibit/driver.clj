@@ -30,16 +30,20 @@
   (sort-by #(.getAbsolutePath ^File %)
            (filter clojure-file? (file-seq dir))))
 
+(defn- pmapcat [f & colls]
+  (apply concat (apply pmap f colls)))
+
 (defn run [source-paths & args]
   (let [[options file-args usage-text] (apply (partial cli args) cli-specs)
-        source-files (mapcat #(-> % io/file find-clojure-sources-in-dir)
-                             (if (empty? file-args) source-paths file-args))]
-    (mapcat (fn [file] (try (check-file file :reporter (name-to-reporter (:reporter options)
+        source-files (pmapcat #(-> % io/file find-clojure-sources-in-dir)
+                              (if (empty? file-args) source-paths file-args))]
+    (pmapcat (fn [file] (try (check-file file :reporter (name-to-reporter (:reporter options)
                                                                          cli-reporter))
                             (catch Throwable e
-                              (println (str "At " (.getPath file) ":0:\nCheck failed -- skipping rest of file"))
-                              (println (str "Exception message: " (pr-str (.getMessage e)))))))
-            source-files)))
+                              (println (str "At " (.getPath file) ":0:\nCheck failed -- skipping rest of file"
+                                            "\n"
+                                            "Exception message: " (pr-str (.getMessage e)))))))
+             source-files)))
 
 (defn external-run
   "Used by lein-kibit to count the results and exit with exit-code 1 if results are found"
